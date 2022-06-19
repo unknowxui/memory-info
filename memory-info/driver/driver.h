@@ -9,7 +9,9 @@ typedef uintptr_t( __stdcall* CallHook)(PVOID);
 //
 // Call hook in kernel
 //
-uintptr_t call_hook( PVOID arguments ) {
+static
+uintptr_t 
+call_hook( PVOID arguments ) {
     LoadLibrary( "user32.dll" );
 
     void* control_function = GetProcAddress( LoadLibrary( "win32u.dll" ), "NtOpenCompositionSurfaceSectionInfo" );
@@ -22,6 +24,7 @@ uintptr_t call_hook( PVOID arguments ) {
 //
 // Get process handle by process id
 //
+static
 HANDLE 
 drv_get_process_handle(DWORD pId) {
     DRIVERCONTROL rqst = { 0 };
@@ -36,6 +39,7 @@ drv_get_process_handle(DWORD pId) {
 //
 // Allocate virtual memory in driver
 //
+static
 PVOID 
 drv_allocate_virtual_memory(DWORD pId,size_t size) {
     PVOID base = 0;
@@ -56,6 +60,7 @@ drv_allocate_virtual_memory(DWORD pId,size_t size) {
 //
 // Write Process memory
 //
+static
 void 
 drv_write_memory(DWORD pId, PVOID base, PVOID buffer, SIZE_T size ) {
     SIZE_T retSize = 0;
@@ -74,6 +79,7 @@ drv_write_memory(DWORD pId, PVOID base, PVOID buffer, SIZE_T size ) {
 //
 // Read process memory
 //
+static
 PVOID 
 drv_read_memory( DWORD pId, PVOID base, size_t size ) {
     PVOID buffer = 0;
@@ -93,6 +99,7 @@ drv_read_memory( DWORD pId, PVOID base, size_t size ) {
 //
 // Memory basic information
 //
+static
 MEMORY_BASIC_INFORMATION 
 drv_memory_basic_information( DWORD pId, PVOID base ) {
     size_t retLen = 0;
@@ -113,6 +120,7 @@ drv_memory_basic_information( DWORD pId, PVOID base ) {
 //
 // Change memory protect
 //
+static
 DWORD 
 drv_protect_memory( DWORD pId, PVOID address, size_t size, DWORD protect ) {
     DWORD old = 0;

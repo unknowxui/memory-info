@@ -2,6 +2,8 @@
 
 #include "defs.h"
 
+#include "../driver/driver.h"
+
 #include <stdio.h>
 
 DWORD  get_pid_by_process_name               ( const char* pName ) {
@@ -63,4 +65,24 @@ MEMORY_BASIC_INFORMATION memory_basic_info   ( HANDLE pHandle, PVOID dst) {
 	}
 
 	return mbi;
+}
+
+void inject(DWORD pId, const char* dllPath ) {
+	PVOID allocateMemory = drv_allocate_virtual_memory( pId, strlen( dllPath ) );
+	if ( !allocateMemory ) {
+		err( "Error allocate driver memory ! \n" );
+		return;
+	}
+
+	HANDLE pHandle = drv_get_process_handle( pId );
+	if ( !pHandle ) {
+		err( "Error open process handle ! \n" );
+		return;
+	}
+
+	drv_write_memory( pId, allocateMemory, dllPath, strlen( dllPath ) );
+	CreateRemoteThread( pHandle, 0, 0, ( LPTHREAD_START_ROUTINE )LoadLibrary, allocateMemory, 0, 0 );
+
+	//WaitForSingleObject( pHandle, INFINITE );
+	info( "Success ! \n" );
 }

@@ -34,7 +34,7 @@ int isUseDriver = 0;
 
 int main(int argc,char* argv[]) {
     printf_s( "Entry ! \n" );
-
+   
     //
     // If exitApp is true application exit
     //
@@ -111,6 +111,23 @@ int main(int argc,char* argv[]) {
         //
         else if ( !strcmp( line, ".useDrv" ) ) {
             isUseDriver = pId;
+        }
+
+        //
+        // Inject dll
+        //
+        else if ( !strcmp( line, ".inject" ) ) {
+            if ( !attachedProcessPid ) {
+                err( "Pls use .attach for get pid ! \n" );
+                continue;
+            }
+
+            char path[256];
+
+            printf( "\n Dll path>:" );
+            scanf( "%s", path );
+
+            inject( attachedProcessPid, path );
         }
 
         //
