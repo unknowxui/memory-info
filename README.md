@@ -1,7 +1,7 @@
 # memory-info
 Program manages memory
 
-- Functional
+# Functional
  - Write Process memory
  - Read Process  memory
  - Allocate virtual memory
