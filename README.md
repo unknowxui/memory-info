@@ -1,4 +1,4 @@
-# memory-info
+# Memory-info
 Program manages memory
 
 # Functional
@@ -8,3 +8,6 @@ Program manages memory
  - Memory basic information
  - Change Memory protect
  - Inject dll
+
+# Remarks
+If when using the command .useDrv 1 there are functions in which it is possible to use kernel functions, it will use them
