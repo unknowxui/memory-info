@@ -29,5 +29,11 @@
     <ClInclude Include="api\defs.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="driver\driver.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="driver\struct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

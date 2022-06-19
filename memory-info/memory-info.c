@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "api/defs.h"
+#include "driver/driver.h"
 
+#include "api/defs.h"
 #include "api/api.h"
 
 #pragma warning( disable : 4996)
@@ -21,6 +22,14 @@ DWORD  attachedProcessPid   = 0;
 // If this is null some command not run
 // 
 HANDLE attachProcessHandle  = 0;
+
+//
+// If this is 1 when used driver functino 
+//
+int isUseDriver = 0;
+
+
+
 
 
 int main(int argc,char* argv[]) {
@@ -66,7 +75,20 @@ int main(int argc,char* argv[]) {
             info( "Command attach %s ! \n", line );
 #endif
             if ( pId ) {
-                HANDLE pHandle = get_phandle( pId );
+                HANDLE pHandle = 0;
+                if ( isUseDriver ) {
+
+                    // 
+                    // If driver loaded when return process handle
+                    //
+                    pHandle = drv_get_process_handle( pId );
+
+                } else {
+
+                    pHandle = get_phandle( pId );
+
+                }
+
                 if ( pHandle == INVALID_HANDLE_VALUE || !pHandle ) {
                     err( "Error: process not open ! %i \n", GetLastError() );
                     continue;
@@ -82,6 +104,13 @@ int main(int argc,char* argv[]) {
                 err( "Error: pId for attach 0 ! \n" );
             }
 #endif
+        }
+
+        //
+        // Use driver function
+        //
+        else if ( !strcmp( line, ".useDrv" ) ) {
+            isUseDriver = pId;
         }
 
         //
@@ -112,10 +141,18 @@ int main(int argc,char* argv[]) {
             info( "Protect->Address->Size: ");
             scanf( "%p %p %i",&newProtect, &address,&size );
 
-            DWORD old = change_protect_memory( attachProcessHandle, address, size, newProtect );
-            if ( old ) {
-                info( "Change protect Success ! \n" );
-                info( "change_protect_memory: old protect %i \n", old );
+            DWORD old = 0;
+
+            if ( isUseDriver ) {
+                info( "drv_protect_memory is use driver ! \n" );
+                old = drv_protect_memory( attachedProcessPid, address, size, newProtect );
+
+            } else {
+                old = change_protect_memory( attachProcessHandle, address, size, newProtect );
+                if ( old ) {
+                    info( "Change protect Success ! \n" );
+                    info( "change_protect_memory: old protect %i \n", old );
+                }
             }
         }
 
@@ -146,7 +183,13 @@ int main(int argc,char* argv[]) {
                 continue;
             }
 
-            MEMORY_BASIC_INFORMATION memInfo = memory_basic_info( attachProcessHandle, address );
+            MEMORY_BASIC_INFORMATION memInfo;
+            if(isUseDriver ){
+                memInfo = drv_memory_basic_information( attachedProcessPid, address );
+            } else {
+                memInfo = memory_basic_info( attachProcessHandle, address );
+            }
+
             if ( !memInfo.BaseAddress )
                 continue;
 
@@ -183,6 +226,45 @@ int main(int argc,char* argv[]) {
         }
 
         //
+        // Write memory
+        // 
+        else if ( !strcmp( line, ".write" ) ) {
+            if ( !attachedProcessPid ) {
+                err( "Pls use .attach for open handle process ! \n" );
+                continue;
+            }
+
+            printf( "Address->Size->Type: " );
+
+            PVOID address;
+            int   size;
+            char  type[10];
+
+            char        dataStr[10];
+            int         dataInt;
+            float       dataFloat;
+
+            scanf( "%p %i %s", &address, &size, type );
+            if ( !strcmp( type, "int" ) ) {
+                printf( "\t Data: " );
+                scanf( "%i", &dataInt );
+
+                drv_write_memory( attachedProcessPid, address, &dataInt, size );
+            }
+            else if ( !strcmp( type, "float" ) ) {
+                printf( "\t Data: " );
+                scanf( "%f", &dataFloat );
+
+                drv_write_memory( attachedProcessPid, address, &dataFloat, size );
+            } else if ( !strcmp( type, "str" ) ) {
+                printf( "\t Data: " );
+                scanf( "%s", &dataStr );
+
+                drv_write_memory( attachedProcessPid, address, &dataStr, size );
+            }
+
+        }
+
         // For exit program
         //
         else if ( !strcmp( line, ".exit" ) ) {

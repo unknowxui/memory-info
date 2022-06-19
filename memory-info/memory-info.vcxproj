@@ -146,6 +146,8 @@
   <ItemGroup>
     <ClInclude Include="api\api.h" />
     <ClInclude Include="api\defs.h" />
+    <ClInclude Include="driver\driver.h" />
+    <ClInclude Include="driver\struct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
